@@ -6,83 +6,53 @@
 
 SoftwareSerial linSerial(LIN_RX_PIN, LIN_TX_PIN);
 
+byte calculateChecksum(byte frameID, byte data[], int length) {
+  byte checksum = frameID;
+  for (int i = 0; i < length; i++) {
+    checksum += data[i];
+  }
+  return ~checksum;
+}
+
 void sendWakeUpSignal() {
   for (int i = 0; i < 11; i++) {
     linSerial.write((uint8_t)0x00); // Send break signal
   }
-  linSerial.write(0x55); // Sync Byte
   Serial.println("Master Debug: Wake-Up Signal Sent");
-  delay(200); // Increased delay for slave to wake up
 }
 
-void sendIgnitionFrame() {
-  byte frameID = 0x0D; // Frame ID for ignition
-  byte data[] = {0x00, 0x80, 0x64, 0x60}; // Ignition data
-  byte checksum = frameID;
-  for (int i = 0; i < sizeof(data); i++) {
-    checksum += data[i];
-  }
-  checksum = ~checksum;
-
+void sendLINFrame(byte frameID, byte data[], int length) {
+  byte checksum = calculateChecksum(frameID, data, length);
   linSerial.write(0x55); // Sync Byte
-  linSerial.write(frameID);
-  for (int i = 0; i < sizeof(data); i++) {
-    linSerial.write(data[i]);
+  linSerial.write(frameID); // Frame ID
+  for (int i = 0; i < length; i++) {
+    linSerial.write(data[i]); // Data bytes
   }
-  linSerial.write(checksum);
+  linSerial.write(checksum); // Checksum
 
-  Serial.print("Master Debug: Ignition Frame Sent: 0x55 0x");
+  // Debug output
+  Serial.print("Master Debug: Frame Sent: 0x55 0x");
   Serial.print(frameID, HEX);
-  for (int i = 0; i < sizeof(data); i++) {
+  for (int i = 0; i < length; i++) {
     Serial.print(" 0x");
     Serial.print(data[i], HEX);
   }
   Serial.print(" 0x");
   Serial.println(checksum, HEX);
-
-  delay(200); // Delay for the slave to process the ignition frame
 }
 
-void pollButtonBlock() {
-  byte frameID = 0x8E; // Button block Frame ID
-  byte data[] = {0x10, 0x00, 0x00, 0xA3, 0x00, 0x00, 0x00};
-  byte checksum = frameID;
-  for (int i = 0; i < sizeof(data); i++) {
-    checksum += data[i];
-  }
-  checksum = ~checksum;
-
-  linSerial.write(0x55); // Sync Byte
-  linSerial.write(frameID);
-  for (int i = 0; i < sizeof(data); i++) {
-    linSerial.write(data[i]);
-  }
-  linSerial.write(checksum);
-
-  Serial.print("Master Debug: Poll Sent: 0x55 0x");
-  Serial.print(frameID, HEX);
-  for (int i = 0; i < sizeof(data); i++) {
-    Serial.print(" 0x");
-    Serial.print(data[i], HEX);
-  }
-  Serial.print(" 0x");
-  Serial.println(checksum, HEX);
-
-  delay(200); // Delay for the slave to respond
-}
-
-void receiveResponse() {
+void readResponse() {
   if (linSerial.available()) {
     Serial.print("Master Debug: Response Received: ");
     while (linSerial.available()) {
-      byte receivedByte = linSerial.read();
+      byte received = linSerial.read();
       Serial.print("0x");
-      Serial.print(receivedByte, HEX);
+      Serial.print(received, HEX);
       Serial.print(" ");
     }
     Serial.println();
   } else {
-    Serial.println("Master Debug: No Response Received");
+    Serial.println("Master Debug: No Response");
   }
 }
 
@@ -95,9 +65,19 @@ void setup() {
 }
 
 void loop() {
+  byte ignitionData[] = {0x1A, 0x00, 0x00, 0x64, 0x60};
+  byte pollData[] = {0x10, 0x00, 0x00, 0xA3, 0x00, 0x00, 0x00};
+
   sendWakeUpSignal();
-  sendIgnitionFrame();
-  pollButtonBlock();
-  receiveResponse();
-  delay(1000); // Wait before next cycle
+  delay(50); // Ensure sufficient wake-up delay
+
+  sendLINFrame(0x0D, ignitionData, 5); // Ignition frame
+  delay(20); // Short delay
+  readResponse();
+
+  sendLINFrame(0x8E, pollData, 7); // Poll frame
+  delay(20); // Short delay
+  readResponse();
+
+  delay(200); // Delay before next loop
 }
