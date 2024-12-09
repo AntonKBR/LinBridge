@@ -1,5 +1,52 @@
 #define LIN_TX_PIN 1  // TX1 pin on Arduino Mega (Hardware Serial1)
 
+const char* keyMapping[] = {
+  "None",         // 0x00
+  "Unknown",      // 0x01
+  "Src+",         // 0x02
+  "Src-",         // 0x03
+  "Arrow Up",     // 0x04
+  "Arrow Down",   // 0x05
+  "Unknown",      // 0x06
+  "OK",           // 0x07
+  "Unknown",      // 0x08
+  "Unknown",      // 0x09
+  "Volume+",      // 0x0A
+  "Unknown",      // 0x0B
+  "Unknown",      // 0x0C
+  "Unknown",      // 0x0D
+  "Unknown",      // 0x0E
+  "Unknown",      // 0x0F
+  "Volume+",      // 0x10
+  "Volume-",      // 0x11
+  "Unknown",      // 0x12
+  "Unknown",      // 0x13
+  "Unknown",      // 0x14
+  "Next",         // 0x15
+  "Previous",     // 0x16
+  "Unknown",      // 0x17
+  "Unknown",      // 0x18
+  "Voice",        // 0x19
+  "Unknown",      // 0x1A
+  "Unknown",      // 0x1B
+  "Unknown",      // 0x1C
+  "Unknown",      // 0x1D
+  "Unknown",      // 0x1E
+  "Unknown",      // 0x1F
+  "Unknown",      // 0x20
+  "Unknown",      // 0x21
+  "Unknown",      // 0x22
+  "View",         // 0x23
+};
+
+const char* shifterMapping[] = {
+  "empty",
+  "Shift -",      //1
+  "Shift +",      //2
+  "Shift + -",     //3
+};
+
+
 void setup() {
   Serial.begin(115200);                 // Debugging output
   Serial1.begin(19200, SERIAL_8N1);     // LIN communication at 19,200 baud
@@ -63,26 +110,59 @@ void listenForResponse() {
     // Check if any button-related data is non-zero
     if (response[3] != 0 || response[4] != 0 || response[5] != 0 || response[7] != 0 || response[8] != 0 || response[9] != 0) {
       // Interpret and display button presses
-      if (response[3] != 0 || response[4] != 0 || response[5] != 0) {
-        Serial.print("Key 1: ");
+      if (response[3] != 0) {
+        Serial.print(getButtonName(response[3]));
+        Serial.print(" (ID: ");
         Serial.print(response[3], HEX);
-        Serial.print(", Key 2: ");
+        Serial.print(") ");
+      }
+      if (response[4] != 0) {
+        Serial.print(getButtonName(response[4]));
+        Serial.print(" (ID: ");
         Serial.print(response[4], HEX);
-        Serial.print(", Press Type: ");
-        Serial.println(response[5], HEX);
+        Serial.print(") ");
       }
 
+      // Interpret paddles
       if (response[7] != 0 || response[8] != 0 || response[9] != 0) {
-        Serial.print("Paddle(s) pressed: ");
-        Serial.print(response[7], HEX);
-        Serial.print(", ");
-        Serial.print(response[8], HEX);
-        Serial.print(", ");
-        Serial.println(response[9], HEX);
+        Serial.print("Paddles: ");
+        if (response[7] != 0) {
+          Serial.print(response[7]);
+          Serial.print(" (ID: ");
+          Serial.print(response[7], HEX);
+          Serial.print(") ");
+        }
+        if (response[8] != 0) {
+          Serial.print(getShifteId(response[8]));
+          Serial.print(" (ID: ");
+          Serial.print(response[8], HEX);
+          Serial.print(") ");
+        }
+        if (response[9] != 0) {
+          Serial.print("horn: ");
+          Serial.print(response[9], HEX);
+        }
       }
+
       Serial.println();
     }
   }
+}
+
+const char* getButtonName(byte id) {
+  // Return button name from keyMapping
+  if (id < sizeof(keyMapping) / sizeof(keyMapping[0])) {
+    return keyMapping[id];
+  }
+  return "Unknown";
+}
+
+const char* getShifteId(byte id) {
+  // Return shifter id  from shifterMapping
+  if (id < sizeof(shifterMapping) / sizeof(shifterMapping[0])) {
+    return shifterMapping[id];
+  }
+  return "Unknown";
 }
 
 byte calculateParity(byte id) {
