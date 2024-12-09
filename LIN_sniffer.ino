@@ -8,10 +8,8 @@ void setup() {
 
 void loop() {
   sendLINFrame();                       // Send the 0x0D LIN frame (ignition signal)
-  delay(100);                           // Short delay
   sendFrame8E();                        // Send the 0x8E LIN header only
-  listenForResponse();                  // Capture and print responses from 0x8E
-  delay(100);                           // Short delay
+  listenForResponse();                  // Capture and print responses if button pressed
 }
 
 void sendBreakSignal() {
@@ -25,7 +23,7 @@ void sendBreakSignal() {
 void sendLINFrame() {
   byte rawId = 0x0D;                    // Raw ID (6 bits) for the first frame
   byte pid = calculateParity(rawId);    // Calculate PID with parity bits
-  byte data[] = {0x64, 0x80, 0x64, 0x40};  // Data bytes for the first frame
+  byte data[] = {0x64, 0x81, 0xFF, 0xFF};  // Data bytes for the first frame
 
   byte checksum = calculateEnhancedChecksum(pid, data, sizeof(data));  // Enhanced checksum
 
@@ -38,17 +36,6 @@ void sendLINFrame() {
   }
 
   Serial1.write(checksum);              // Checksum
-
-  // Debugging output
-  Serial.print("Sent Frame [0x0D]: [PID: ");
-  Serial.print(pid, HEX);
-  Serial.print("] Data: ");
-  for (int i = 0; i < sizeof(data); i++) {
-    Serial.print(data[i], HEX);
-    Serial.print(" ");
-  }
-  Serial.print("Checksum: ");
-  Serial.println(checksum, HEX);
 }
 
 void sendFrame8E() {
@@ -58,50 +45,43 @@ void sendFrame8E() {
   sendBreakSignal();
   Serial1.write(0x55);                  // Sync Byte
   Serial1.write(pid);                   // PID only (no data or checksum)
-
-  // Debugging output
-  Serial.print("Sent Header [0x8E]: [PID: ");
-  Serial.print(pid, HEX);
-  Serial.println("]");
 }
 
 void listenForResponse() {
   unsigned long startTime = millis();
-  byte response[16];                     // Increased buffer size for safety
+  byte response[16] = {0};             // Buffer for up to 16 bytes
   int index = 0;
 
-  while (millis() - startTime < 200) {   // Increased timeout to 200ms
+  while (millis() - startTime < 75) {   // Timeout of 75ms
     if (Serial1.available()) {
       response[index++] = Serial1.read();
-      if (index >= sizeof(response)) break;  // Stop reading if buffer is full
+      if (index >= sizeof(response)) break;  // Stop if the buffer is full
     }
   }
 
   if (index > 0) {
-    Serial.print("Raw Response: ");
-    for (int i = 0; i < index; i++) {
-      Serial.print(response[i], HEX);
-      Serial.print(" ");
-    }
-    Serial.println();
-
-    // Checksum validation
-    if (index >= 2) { // Minimum response size to validate checksum
-      byte pid = response[1]; // PID is the second byte
-      byte receivedChecksum = response[index - 1]; // Last byte is the checksum
-      byte calculatedChecksum = calculateEnhancedChecksum(pid, response + 2, index - 3); // Exclude PID and checksum
-
-      if (receivedChecksum == calculatedChecksum) {
-        Serial.println("Checksum valid.");
-      } else {
-        Serial.print("Checksum invalid. Calculated: ");
-        Serial.print(calculatedChecksum, HEX);
-        Serial.print(", Received: ");
-        Serial.println(receivedChecksum, HEX);
+    // Check if any button-related data is non-zero
+    if (response[3] != 0 || response[4] != 0 || response[5] != 0 || response[7] != 0 || response[8] != 0 || response[9] != 0) {
+      // Interpret and display button presses
+      if (response[3] != 0 || response[4] != 0 || response[5] != 0) {
+        Serial.print("Key 1: ");
+        Serial.print(response[3], HEX);
+        Serial.print(", Key 2: ");
+        Serial.print(response[4], HEX);
+        Serial.print(", Press Type: ");
+        Serial.println(response[5], HEX);
       }
+
+      if (response[7] != 0 || response[8] != 0 || response[9] != 0) {
+        Serial.print("Paddle(s) pressed: ");
+        Serial.print(response[7], HEX);
+        Serial.print(", ");
+        Serial.print(response[8], HEX);
+        Serial.print(", ");
+        Serial.println(response[9], HEX);
+      }
+      Serial.println();
     }
-  } else {
-    Serial.println("No response received.");
   }
 }
 
