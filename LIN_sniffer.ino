@@ -125,7 +125,6 @@ void listenForResponse() {
 
       // Interpret paddles
       if (response[7] != 0 || response[8] != 0 || response[9] != 0) {
-        Serial.print("Paddles: ");
         if (response[7] != 0) {
           Serial.print(response[7]);
           Serial.print(" (ID: ");
