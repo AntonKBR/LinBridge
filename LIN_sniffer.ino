@@ -1,4 +1,3 @@
-#include <cstddef>
 #define LIN_TX_PIN 1  // TX1 pin on Arduino Mega (Hardware Serial1)
 
 #define LIN_TIMEOUT 75   // Timeout for LIN response in milliseconds
@@ -12,6 +11,12 @@
   #define LOG(x)
   #define LOGV(x)
 #endif
+
+const byte SYNC_BYTE = 0x55;
+const byte IGNITION_FRAME_ID = 0x0D;
+const byte BUTTON_REQUEST_FRAME_ID = 0x8E;
+const int LIN_BAUD_RATE = 19200;
+const int BREAK_BAUD_RATE = 9600;
 
 // Shifter Mapping
 const char* getShifterName(byte id) {
@@ -43,7 +48,7 @@ const char* getButtonName(byte id) {
 
 void setup() {
   Serial.begin(115200);                 // Debugging output
-  Serial1.begin(19200, SERIAL_8N1);     // LIN communication at 19,200 baud
+  Serial1.begin(LIN_BAUD_RATE, SERIAL_8N1);     // LIN communication at 19,200 baud
   LOG("LIN Master Initialized");
 }
 
@@ -56,38 +61,37 @@ void loop() {
 // Function to send a LIN Break Signal
 void sendBreakSignal() {
   Serial1.end();
-  Serial1.begin(9600, SERIAL_8N1);      // Temporarily lower baud rate
+  Serial1.begin(BREAK_BAUD_RATE, SERIAL_8N1);      // Temporarily lower baud rate
   Serial1.write(0x00);                  // Send a null byte (dominant signal)
   Serial1.end();
-  Serial1.begin(19200, SERIAL_8N1);     // Restore LIN baud rate
+  Serial1.begin(LIN_BAUD_RATE, SERIAL_8N1);     // Restore LIN baud rate
 }
 
-// Function to send the Ignition Frame
-void sendIgnitionFrame() {
-  byte rawId = 0x0D;
+// Function to send a LIN Frame
+void sendLINFrame(byte rawId, byte* data, int dataLength) {
   byte pid = calculateParity(rawId);
-  byte data[] = {0x64, 0x81, 0xFF, 0xFF};  // Example data: Illumination and accessory status
-  byte checksum = calculateEnhancedChecksum(pid, data, sizeof(data));
+  byte checksum = calculateEnhancedChecksum(pid, data, dataLength);
 
   sendBreakSignal();
-  Serial1.write(0x55);  // Sync Byte
+  Serial1.write(SYNC_BYTE);  // Sync Byte
   Serial1.write(pid);   // PID
 
-  for (int i = 0; i < sizeof(data); i++) {
+  for (int i = 0; i < dataLength; i++) {
     Serial1.write(data[i]);
   }
 
   Serial1.write(checksum);
 }
 
+// Function to send the Ignition Frame
+void sendIgnitionFrame() {
+  byte data[] = {0x64, 0x81, 0xFF, 0xFF};  // Example data: Illumination and accessory status
+  sendLINFrame(IGNITION_FRAME_ID, data, sizeof(data));
+}
+
 // Function to send a Button Request Frame
 void sendButtonRequestFrame() {
-  byte rawId = 0x8E;
-  byte pid = calculateParity(rawId);
-
-  sendBreakSignal();
-  Serial1.write(0x55);  // Sync Byte
-  Serial1.write(pid);   // PID
+  sendLINFrame(BUTTON_REQUEST_FRAME_ID, nullptr, 0);
 }
 
 // Function to listen and parse LIN responses
