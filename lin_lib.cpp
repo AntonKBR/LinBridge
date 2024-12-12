@@ -1,5 +1,7 @@
 #include "lin_lib.h"
 
+byte backlight = 0x64;
+
 // Mappings
 const char *getShifterName(byte id)
 {
@@ -85,10 +87,10 @@ const char *getAccStateName(byte id)
 void sendBreakSignal()
 {
   Serial1.end();
-  Serial1.begin(9600, SERIAL_8N1); // Temporarily lower baud rate
-  Serial1.write(0x00);             // Send a null byte (dominant signal)
+  Serial1.begin(9600, SERIAL_8N1);
+  Serial1.write(0x00);
   Serial1.end();
-  Serial1.begin(19200, SERIAL_8N1); // Restore LIN baud rate
+  Serial1.begin(19200, SERIAL_8N1);
 }
 
 byte calculateParity(byte id)
@@ -116,12 +118,12 @@ void sendIgnitionFrame()
 {
   byte rawId = 0x0D;
   byte pid = calculateParity(rawId);
-  byte data[] = {0x64, 0x81, 0xFF, 0xFF};
+  byte data[] = {backlight, 0xFF, 0xFF, 0xFF};
   byte checksum = calculateEnhancedChecksum(pid, data, sizeof(data));
 
   sendBreakSignal();
-  Serial1.write(0x55); // Sync Byte
-  Serial1.write(pid);  // PID
+  Serial1.write(0x55);
+  Serial1.write(pid);
 
   for (int i = 0; i < sizeof(data); i++)
   {
@@ -137,8 +139,8 @@ void sendButtonRequestFrame()
   byte pid = calculateParity(rawId);
 
   sendBreakSignal();
-  Serial1.write(0x55); // Sync Byte
-  Serial1.write(pid);  // PID
+  Serial1.write(0x55);
+  Serial1.write(pid);
 }
 
 void sendAccRequestFrame()
@@ -147,8 +149,8 @@ void sendAccRequestFrame()
   byte pid = calculateParity(rawId);
 
   sendBreakSignal();
-  Serial1.write(0x55); // Sync Byte
-  Serial1.write(pid);  // PID
+  Serial1.write(0x55);
+  Serial1.write(pid);
 }
 
 void listenForResponse(byte *response, int &index)
@@ -167,40 +169,82 @@ void listenForResponse(byte *response, int &index)
   }
 }
 
+void backlightSwitch()
+{
+  if (backlight == 0x00)
+  {
+    backlight = 0x64;
+    Serial.println("Backlight turned on");
+  }
+  else
+  {
+    backlight = 0x00;
+    Serial.println("Backlight turned off");
+  }
+  sendIgnitionFrame();
+  delay(500);
+}
+
+void adjustBacklight(byte shifter)
+{
+  if (shifter == 0x01) // Shift -
+  {
+    if (backlight > 0x00)
+      backlight -= 4;
+    Serial.println("Backlight decreased: " + String(backlight, HEX));
+  }
+  else if (shifter == 0x02) // Shift +
+  {
+    if (backlight < 0x64)
+      backlight += 4;
+    Serial.println("Backlight increased: " + String(backlight, HEX));
+  }
+  else if (shifter == 0x03) // Switch
+  {
+    backlightSwitch();
+  }
+  sendIgnitionFrame();
+}
+
 void parseResponse(byte *response, int length)
 {
-  if (length < 2)
-  {
-    Serial.println("Response too short to parse.");
-    return;
-  }
-
   if (response[1] == 0x8E)
   {
     if (response[3] != 0)
     {
       Serial.print("Button 1: ");
-      Serial.println(getButtonName(response[3]));
-    }
-    if (response[4] != 0)
-    {
-      Serial.print("Button 2: ");
-      Serial.println(getButtonName(response[4]));
+      Serial.print(getButtonName(response[3]));
+
+      if (response[4] != 0)
+      {
+        Serial.print(" + Button 2: ");
+        Serial.print(getButtonName(response[4]));
+      }
+      Serial.print(" Status: ");
+      Serial.print(String(response[5], HEX));
+      Serial.println();
     }
     if (response[7] != 0)
     {
-      Serial.print("Shifter: ");
-      Serial.println(getShifterName(response[7]));
+      Serial.print("Shifter 7: ");
+      for (int i = 0; i < 10; i++)
+      {
+        Serial.print(" ");
+        Serial.print(String(response[i], HEX));
+      }
+      Serial.println();
     }
     if (response[8] != 0)
     {
-      Serial.print("Shifter: ");
+      Serial.print("Shifter 8: ");
       Serial.println(getShifterName(response[8]));
+      adjustBacklight(response[8]);
+      Serial.println();
     }
     if (response[9] != 0)
     {
       Serial.print("Horn: ");
-      Serial.println(getShifterName(response[9]));
+      Serial.println(String(response[9] == 0x01, HEX));
     }
   }
   else if (response[1] == 0xCF)
