@@ -7,14 +7,10 @@ const char *getShifterName(byte id)
 {
   switch (id)
   {
-  case 0x01:
-    return "Shift -";
-  case 0x02:
-    return "Shift +";
-  case 0x03:
-    return "Shift +/-";
-  default:
-    return "Unknown";
+  case 0x01:  return "Shift -";
+  case 0x02:  return "Shift +";
+  case 0x03:  return "Shift +/-";
+  default:  return "Unknown";
   }
 }
 
@@ -22,30 +18,18 @@ const char *getButtonName(byte id)
 {
   switch (id)
   {
-  case 0x02:
-    return "Src+";
-  case 0x03:
-    return "Src-";
-  case 0x04:
-    return "Arrow Up";
-  case 0x05:
-    return "Arrow Down";
-  case 0x07:
-    return "OK";
-  case 0x10:
-    return "Volume+";
-  case 0x11:
-    return "Volume-";
-  case 0x15:
-    return "Next";
-  case 0x16:
-    return "Previous";
-  case 0x19:
-    return "Voice";
-  case 0x23:
-    return "View";
-  default:
-    return "Unknown";
+  case 0x02:  return "Src+";
+  case 0x03:  return "Src-";
+  case 0x04:  return "Arrow Up";
+  case 0x05:  return "Arrow Down";
+  case 0x07:  return "OK";
+  case 0x10:  return "Volume+";
+  case 0x11:  return "Volume-";
+  case 0x15:  return "Next";
+  case 0x16:  return "Previous";
+  case 0x19:  return "Voice";
+  case 0x23:  return "View";
+  default:  return "Unknown";
   }
 }
 
@@ -53,20 +37,13 @@ const char *getAccButtonName(byte id)
 {
   switch (id)
   {
-  case 0x81:
-    return "ACC Set";
-  case 0x82:
-    return "ACC Speed +";
-  case 0x84:
-    return "ACC Speed -";
-  case 0xB0:
-    return "ACC Distance";
-  case 0x88:
-    return "ACC Resume";
-  case 0x80:
-    return "ACC Mode (Ignored)";
-  default:
-    return "Unknown ACC Button";
+  case 0x81:  return "ACC Set";
+  case 0x82:  return "ACC Speed +";
+  case 0x84:  return "ACC Speed -";
+  case 0xB0:  return "ACC Distance";
+  case 0x88:  return "ACC Resume";
+  case 0x80:  return "ACC Mode (Ignored)";
+  default:  return "Unknown ACC Button";
   }
 }
 
@@ -74,12 +51,9 @@ const char *getAccStateName(byte id)
 {
   switch (id)
   {
-  case 0x2A:
-    return "ACC On/Off";
-  case 0x2B:
-    return "ACC Idle";
-  default:
-    return "Unknown ACC State";
+  case 0x2A:  return "ACC On/Off";
+  case 0x2B:  return "ACC Idle";
+  default:  return "Unknown ACC State";
   }
 }
 
