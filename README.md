@@ -17,6 +17,8 @@
 ## **Supported Platforms**
 
 - **VW MQB Platform**: Specifically designed to support LIN and CAN communication for the Volkswagen Modular Transverse Matrix (MQB) platform.
+- **Steering Wheel Types**:
+  - **Multicontrol Steering Wheel**: Includes AAC (Adaptive Cruise Control), Voice, View buttons, and DSG shifters for manual gear control.
 
 ---
 
@@ -25,7 +27,7 @@
 ### **Current Setup**
 - **Microcontroller**: Arduino Pro Mini
 - **LIN Adapter**: TTL LIN adapter (e.g., MCP2004A)
-- **GPIO Buttons**: Functions like Arrow Up, Arrow Down, OK, Shift+/-, etc.
+- **GPIO Buttons**: Functions like Arrow Up, Arrow Down, OK, Shift+/-, AAC, Voice, View, DSG shifters.
 
 ### **Future Setup**
 - **Microcontroller**: ESP32-C3-Zero or ESP32-based board
