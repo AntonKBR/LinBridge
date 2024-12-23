@@ -30,7 +30,7 @@
 - **GPIO Buttons**: Functions like Arrow Up, Arrow Down, OK, Shift+/-, AAC, Voice, View, DSG shifters.
 
 ### **Future Setup**
-- **Microcontroller**: ESP32-C3-Zero or ESP32-based board
+- **Microcontroller**: ESP32-S3-Zero or ESP32-based board
 - **Transceivers**:
   - LIN: MCP2004A or TJA1020
   - CAN: MCP2515 or TJA1050 (Planned)
