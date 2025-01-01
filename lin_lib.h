@@ -10,7 +10,7 @@ extern HardwareSerial SerialLIN;  // Use UART1 for LIN (declaration only)
 #define LIN_TX_PIN 2  
 #define LIN_RX_PIN 3
 
-#define LIN_TIMEOUT 150   // Timeout for LIN response in milliseconds
+#define LIN_TIMEOUT 10  // Timeout for LIN response in milliseconds
 #define BUFFER_SIZE 16   // Buffer size for LIN response
 
 // Function Declarations

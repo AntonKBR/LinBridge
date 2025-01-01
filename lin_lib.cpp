@@ -186,6 +186,15 @@ void adjustBacklight(byte shifter)
 
 void parseResponse(byte *response, int length)
 {
+
+  if (response) { 
+        for (int i = 0; i < length; i++) {
+            Serial.print(" ");
+            Serial.print(response[i], HEX); 
+        }
+        Serial.println();
+    } 
+  
   if (response[1] == 0x8E)
   {
     if (response[3] != 0)

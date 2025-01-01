@@ -12,7 +12,8 @@
 
 void setup() {
     Serial.begin(115200);
-    uartSetup();  // Ensure this is defined to setup SerialLIN
+    while (!Serial);
+    uartSetup();
     LOG("LIN Master Initialized");
 }
 
@@ -21,12 +22,13 @@ void loop() {
     int index = 0;
 
     sendIgnitionFrame();
-    delay(100);
+    delay(10);
     sendButtonRequestFrame();
     listenForResponse(response, index);
     parseResponse(response, index);
-
+    delay(10);
     sendAccRequestFrame();
     listenForResponse(response, index);
     parseResponse(response, index);
+    delay(20);
 }
