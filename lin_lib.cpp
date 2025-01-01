@@ -1,5 +1,12 @@
 #include "lin_lib.h"
 
+// Instantiate the SerialLIN object
+HardwareSerial SerialLIN(1);  // Define the SerialLIN object here
+
+void uartSetup() {
+    SerialLIN.begin(19200, SERIAL_8N1, LIN_RX_PIN, LIN_TX_PIN);
+}
+
 byte backlight = 0x64;
 
 // Mappings
@@ -57,14 +64,13 @@ const char *getAccStateName(byte id)
   }
 }
 
-// LIN Logic Functions
-void sendBreakSignal()
-{
-  Serial1.end();
-  Serial1.begin(9600, SERIAL_8N1);
-  Serial1.write(0x00);
-  Serial1.end();
-  Serial1.begin(19200, SERIAL_8N1);
+void sendBreakSignal() {
+    // Manually control the TX pin for the break signal
+    pinMode(LIN_TX_PIN, OUTPUT);
+    digitalWrite(LIN_TX_PIN, LOW);  // Break signal (dominant)
+    delayMicroseconds(1000);  // More than 13 bit lengths at 19200 baud
+    pinMode(LIN_TX_PIN, INPUT_PULLUP);  // Return control to UART
+    SerialLIN.begin(19200, SERIAL_8N1, LIN_RX_PIN, LIN_TX_PIN);  // Restart UART
 }
 
 byte calculateParity(byte id)
@@ -96,15 +102,15 @@ void sendIgnitionFrame()
   byte checksum = calculateEnhancedChecksum(pid, data, sizeof(data));
 
   sendBreakSignal();
-  Serial1.write(0x55);
-  Serial1.write(pid);
+  SerialLIN.write(0x55);
+  SerialLIN.write(pid);
 
   for (int i = 0; i < sizeof(data); i++)
   {
-    Serial1.write(data[i]);
+    SerialLIN.write(data[i]);
   }
 
-  Serial1.write(checksum);
+  SerialLIN.write(checksum);
 }
 
 void sendButtonRequestFrame()
@@ -113,8 +119,8 @@ void sendButtonRequestFrame()
   byte pid = calculateParity(rawId);
 
   sendBreakSignal();
-  Serial1.write(0x55);
-  Serial1.write(pid);
+  SerialLIN.write(0x55);
+  SerialLIN.write(pid);
 }
 
 void sendAccRequestFrame()
@@ -123,8 +129,8 @@ void sendAccRequestFrame()
   byte pid = calculateParity(rawId);
 
   sendBreakSignal();
-  Serial1.write(0x55);
-  Serial1.write(pid);
+  SerialLIN.write(0x55);
+  SerialLIN.write(pid);
 }
 
 void listenForResponse(byte *response, int &index)
@@ -134,9 +140,9 @@ void listenForResponse(byte *response, int &index)
 
   while (millis() - startTime < LIN_TIMEOUT)
   {
-    if (Serial1.available())
+    if (SerialLIN.available())
     {
-      response[index++] = Serial1.read();
+      response[index++] = SerialLIN.read();
       if (index >= BUFFER_SIZE)
         break;
     }

@@ -2,11 +2,19 @@
 #define LIN_LIB_H
 
 #include <Arduino.h>
+#include <HardwareSerial.h>
 
-#define LIN_TIMEOUT 75   // Timeout for LIN response in milliseconds
+extern HardwareSerial SerialLIN;  // Use UART1 for LIN (declaration only)
+
+// Constants for LIN communication
+#define LIN_TX_PIN 2  
+#define LIN_RX_PIN 3
+
+#define LIN_TIMEOUT 150   // Timeout for LIN response in milliseconds
 #define BUFFER_SIZE 16   // Buffer size for LIN response
 
 // Function Declarations
+void uartSetup(); 
 void sendBreakSignal();
 byte calculateParity(byte id);
 byte calculateEnhancedChecksum(byte pid, byte* data, int length);
