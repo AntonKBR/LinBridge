@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include "lin_lib.h"
 
 #define DEBUG 1
@@ -13,7 +12,8 @@
 
 void setup() {
     Serial.begin(115200);
-    Serial1.begin(19200, SERIAL_8N1, GPIO_NUM_3, GPIO_NUM_2);
+    while (!Serial);
+    uartSetup();
     LOG("LIN Master Initialized");
 }
 
@@ -24,9 +24,6 @@ void loop() {
     sendIgnitionFrame();
     sendButtonRequestFrame();
     listenForResponse(response, index);
-    parseResponse(response, index);
-
     sendAccRequestFrame();
     listenForResponse(response, index);
-    parseResponse(response, index);
 }
