@@ -1,8 +1,6 @@
 #include "lin_lib.h"
 
-#define LIN_TIMEOUT 100  // Timeout for LIN response in milliseconds
-#define FRAME_END_TIMEOUT 10  // Timeout to detect end of frame
-
+#define LIN_TIMEOUT 35 
 
 // Instantiate the SerialLIN object
 HardwareSerial SerialLIN(1);  // Define the SerialLIN object here

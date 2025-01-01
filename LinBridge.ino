@@ -22,13 +22,8 @@ void loop() {
     int index = 0;
 
     sendIgnitionFrame();
-    delay(100);
     sendButtonRequestFrame();
     listenForResponse(response, index);
-    parseResponse(response, index);
-    delay(100);
     sendAccRequestFrame();
     listenForResponse(response, index);
-    parseResponse(response, index);
-    delay(100);
 }
