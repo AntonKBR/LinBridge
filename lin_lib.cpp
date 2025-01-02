@@ -1,4 +1,5 @@
 #include "lin_lib.h"
+#include "can_lib.h"
 
 #define LIN_TIMEOUT 35 
 
@@ -153,15 +154,22 @@ void listenForResponse(byte *response, int &index) {
         }
     }
 
-    // Process any remaining frame data
     if (frameStarted && index > 0) {
         parseResponse(response, index);
     }
 }
 
 void parseResponse(byte *response, int length) {
+  static unsigned long lastTransmitTime = 0;
+    unsigned long currentTime = millis();
+
+    if (currentTime - lastTransmitTime < 1000) {  // Ensure at least 1 second between transmissions
+        return;  // Skip this transmission
+    }
+
     if (response[1] == 0x8E) {
         if (response[3] != 0) {
+          translateToCan(response);
             Serial.print("Button 1: ");
             Serial.print(getButtonName(response[3]));
 

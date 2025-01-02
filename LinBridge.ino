@@ -1,4 +1,5 @@
 #include "lin_lib.h"
+#include "can_lib.h"
 
 #define DEBUG 1
 
@@ -13,8 +14,9 @@
 void setup() {
     Serial.begin(115200);
     while (!Serial);
-    uartSetup();
-    LOG("LIN Master Initialized");
+    uartSetup();  // Setup UART for LIN communication
+    LOG("LIN Bridge Initialized");
+    canInit();  // Initialize CAN interface
 }
 
 void loop() {
@@ -23,7 +25,9 @@ void loop() {
 
     sendIgnitionFrame();
     sendButtonRequestFrame();
-    listenForResponse(response, index);
+    listenForResponse(response, index);  // Listen for responses and parse them
+    parseResponse(response, index);  // You may need to adjust parsing to integrate CAN sending
     sendAccRequestFrame();
     listenForResponse(response, index);
+    parseResponse(response, index);  // As above, include CAN send function calls as needed
 }

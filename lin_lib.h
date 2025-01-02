@@ -15,6 +15,7 @@ extern HardwareSerial SerialLIN;  // Use UART1 for LIN (declaration only)
 
 // Function Declarations
 void uartSetup(); 
+void canInit();
 void sendBreakSignal();
 byte calculateParity(byte id);
 byte calculateEnhancedChecksum(byte pid, byte* data, int length);
