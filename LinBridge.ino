@@ -1,6 +1,9 @@
 #include "lin_lib.h"
 #include "can_lib.h"
 
+// Constants for LIN communication
+#define NSLP_PIN 4
+
 #define DEBUG 1
 
 #if DEBUG
@@ -14,6 +17,11 @@
 void setup() {
     Serial.begin(115200);
     while (!Serial);
+
+    // Set NSLP pin to HIGH to enable the TJA1020 transceiver
+    pinMode(NSLP_PIN, OUTPUT);  // Configure NSLP_PIN as output
+    digitalWrite(NSLP_PIN, HIGH);  // Set NSLP_PIN to HIGH for normal operation
+
     uartSetup();  // Setup UART for LIN communication
     LOG("LIN Bridge Initialized");
     canInit();  // Initialize CAN interface

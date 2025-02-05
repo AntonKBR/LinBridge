@@ -1,7 +1,6 @@
 #include "lin_lib.h"
 #include "can_lib.h"
 
-#define LIN_TIMEOUT 35 
 
 // Instantiate the SerialLIN object
 HardwareSerial SerialLIN(1);  // Define the SerialLIN object here
@@ -9,8 +8,6 @@ HardwareSerial SerialLIN(1);  // Define the SerialLIN object here
 void uartSetup() {
     SerialLIN.begin(19200, SERIAL_8N1, LIN_RX_PIN, LIN_TX_PIN);
 }
-
-byte backlight = 0x64;
 
 // Mappings
 const char *getShifterName(byte id) {
@@ -59,6 +56,7 @@ const char *getAccStateName(byte id) {
     }
 }
 
+
 void sendBreakSignal() {
     // Manually control the TX pin for the break signal
     pinMode(LIN_TX_PIN, OUTPUT);
@@ -85,20 +83,53 @@ byte calculateEnhancedChecksum(byte pid, byte *data, int length) {
     return ~((byte)sum);
 }
 
+float readVoltage() {
+    int rawADC = analogRead(BACKLIGHT_PIN);  // Replace BACKLIGHT_PIN with GPIO pin number
+    float voltage = (rawADC / 4095.0) * 3.3;  // Convert ADC value to voltage (for 3.3V reference)
+    return voltage;
+}
+
+int calculateBacklight(float voltage) {
+    Serial.print("Voltage: ");
+    Serial.print(String(voltage));
+    Serial.print(" -> Brightness HEX: ");
+
+    int brightness;
+
+    if (voltage < 0.5) {
+        brightness = 0x00;  // Off
+    } else if (voltage >= 2.1) {
+        brightness = 0x64;  // Max brightness at 2.0V
+    } else {
+        // Linear Mapping: 0.5V -> 0x08, 2.0V -> 0x64
+        brightness = round(((voltage - 0.5) / (2.1 - 0.5)) * (0x64 - 0x08) + 0x08);
+    }
+
+    return brightness;
+}
+
 void sendIgnitionFrame() {
-    byte rawId = 0x0D;
-    byte pid = calculateParity(rawId);
-    byte data[] = {backlight, 0xFF, 0xFF, 0xFF};
-    byte checksum = calculateEnhancedChecksum(pid, data, sizeof(data));
+    // Step 1: Read the voltage and calculate the backlight value
+    float voltage = readVoltage();  // Function to read voltage from GPIO 13
+    byte backlight = calculateBacklight(voltage);  // Function to map voltage to backlight value
 
-    sendBreakSignal();
-    SerialLIN.write(0x55);
-    SerialLIN.write(pid);
+    // Step 2: Prepare LIN frame data
+    byte rawId = 0x0D;  // LIN frame ID for ignition
+    byte pid = calculateParity(rawId);  // Calculate parity for the frame ID
+    byte data[] = {backlight, 0xFF, 0xFF, 0xFF};  // Data with dynamic backlight value
+    byte checksum = calculateEnhancedChecksum(pid, data, sizeof(data));  // Calculate checksum
 
+    // Step 3: Send the LIN frame
+    sendBreakSignal();  // Send break signal
+    SerialLIN.write(0x55);  // Sync byte
+    SerialLIN.write(pid);  // Protected ID (PID)
+
+    // Send data bytes
     for (int i = 0; i < sizeof(data); i++) {
         SerialLIN.write(data[i]);
     }
 
+    // Send checksum
     SerialLIN.write(checksum);
     SerialLIN.flush();  // Ensure all data is transmitted before continuing
 }

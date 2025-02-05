@@ -3,7 +3,7 @@
 void canInit() {
     Serial.begin(115200);
     ESP32Can.setPins(CAN_TX, CAN_RX);  // Assuming setPins is a valid method
-    ESP32Can.setSpeed(ESP32Can.convertSpeed(500));
+    ESP32Can.setSpeed(ESP32Can.convertSpeed(100));
 
     if (ESP32Can.begin()) {  
         Serial.println("ESP32Can bus started!");
