@@ -22,6 +22,15 @@ void setup() {
     pinMode(NSLP_PIN, OUTPUT);  // Configure NSLP_PIN as output
     digitalWrite(NSLP_PIN, HIGH);  // Set NSLP_PIN to HIGH for normal operation
 
+     // Set MFA button pins as OUTPUT and initialize to LOW
+    pinMode(MFA_UP_PIN, OUTPUT);
+    pinMode(MFA_DOWN_PIN, OUTPUT);
+    pinMode(MFA_RESET_PIN, OUTPUT);
+
+    digitalWrite(MFA_UP_PIN, LOW);
+    digitalWrite(MFA_DOWN_PIN, LOW);
+    digitalWrite(MFA_RESET_PIN, LOW);
+
     uartSetup();  // Setup UART for LIN communication
     LOG("LIN Bridge Initialized");
     canInit();  // Initialize CAN interface
@@ -33,9 +42,9 @@ void loop() {
 
     sendIgnitionFrame();
     sendButtonRequestFrame();
-    listenForResponse(response, index);  // Listen for responses and parse them
-    parseResponse(response, index);  // You may need to adjust parsing to integrate CAN sending
+    listenForResponse(response, index);
+    parseResponse(response, index);
     sendAccRequestFrame();
     listenForResponse(response, index);
-    parseResponse(response, index);  // As above, include CAN send function calls as needed
+    parseResponse(response, index);
 }

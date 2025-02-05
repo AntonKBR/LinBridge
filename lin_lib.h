@@ -11,6 +11,10 @@ extern HardwareSerial SerialLIN;  // Use UART1 for LIN (declaration only)
 
 #define BACKLIGHT_PIN 13  // GPIO connected to voltage divider
 
+#define MFA_UP_PIN    9  // MFA Up Button (Arrow Up)
+#define MFA_DOWN_PIN  8  // MFA Down Button (Arrow Down)
+#define MFA_RESET_PIN 7  // MFA Reset Button (OK)
+
 #define LIN_TIMEOUT 40  // Timeout for LIN response in milliseconds
 #define BUFFER_SIZE 16   // Buffer size for LIN response
 

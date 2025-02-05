@@ -84,7 +84,7 @@ byte calculateEnhancedChecksum(byte pid, byte *data, int length) {
 }
 
 float readVoltage() {
-    int rawADC = analogRead(BACKLIGHT_PIN);  // Replace BACKLIGHT_PIN with GPIO pin number
+    int rawADC = analogRead(BACKLIGHT_PIN);  
     float voltage = (rawADC / 4095.0) * 3.3;  // Convert ADC value to voltage (for 3.3V reference)
     return voltage;
 }
@@ -154,6 +154,12 @@ void sendAccRequestFrame() {
     SerialLIN.flush();  // Ensure all data is transmitted before continuing
 }
 
+void pressMFAButton(int buttonPin) {
+    digitalWrite(buttonPin, HIGH);  // Press button (simulate short to ground)
+    delay(100);  // Hold button for 100ms 
+    digitalWrite(buttonPin, LOW);  // Release button
+}
+
 void listenForResponse(byte *response, int &index) {
     unsigned long startTime = millis();
     bool frameStarted = false;
@@ -200,9 +206,17 @@ void parseResponse(byte *response, int length) {
 
     if (response[1] == 0x8E) {
         if (response[3] != 0) {
-          translateToCan(response);
+          //translateToCan(response);
             Serial.print("Button 1: ");
             Serial.print(getButtonName(response[3]));
+
+            if (response[3] == 0x04) {
+                pressMFAButton(MFA_UP_PIN);  // Simulate MFA UP button
+            } else if (response[3] == 0x05) {
+                pressMFAButton(MFA_DOWN_PIN);  // Simulate MFA DOWN button
+            } else if (response[3] == 0x07) {
+                pressMFAButton(MFA_RESET_PIN);  // Simulate MFA RESET button
+            }
 
             if (response[4] != 0) {
                 Serial.print(" + Button 2: ");
