@@ -28,50 +28,10 @@ int getButtonPin(uint8_t btnID) {
     return -1;  // Not found
 }
 
-// Handle Button Press
-void handleFirstButtonPress(uint8_t btnID) {
+// Generic function to handle button press or release
+void handleButtonState(uint8_t btnID, bool press) {
     int pin = getButtonPin(btnID);
     if (pin != -1) {
-        digitalWrite(pin, HIGH);
-    }
-}
-
-//Handle Button Release
-void handleFirstButtonRelease(uint8_t btnID) {
-    int pin = getButtonPin(btnID);
-    if (pin != -1) {
-        digitalWrite(pin, LOW);
-    }
-}
-
-// Handle Second Button Press
-void handleSecondButtonPress(uint8_t btnID) {
-    int pin = getButtonPin(btnID);
-    if (pin != -1) {
-        digitalWrite(pin, HIGH);
-    }
-}
-
-// Handle Second Button Release
-void handleSecondButtonRelease(uint8_t btnID) {
-    int pin = getButtonPin(btnID);
-    if (pin != -1) {
-        digitalWrite(pin, LOW);
-    }
-}
-
-// Handle ACC Button Press
-void handleAccButtonPress(uint8_t btnID) {
-    int pin = getButtonPin(btnID);
-    if (pin != -1) {
-        digitalWrite(pin, HIGH);
-    }
-}
-
-// Handle ACC Button Release
-void handleAccButtonRelease(uint8_t btnID) {
-    int pin = getButtonPin(btnID);
-    if (pin != -1) {
-        digitalWrite(pin, LOW);
+        digitalWrite(pin, press ? HIGH : LOW);
     }
 }

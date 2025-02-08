@@ -204,46 +204,39 @@ void parseResponse(byte *response, int length) {
         return;  // Skip this transmission
     }
 
-
     if (response[1] == 0x8E) {
         if (response[3] != 0) {
-            if (pressedFirstButtonID != response[3]) {  // Only press if new button detected
-                handleFirstButtonPress(response[3]);
-                pressedFirstButtonID = response[3];  // Store current button
+            if (pressedFirstButtonID != response[3]) {  
+                handleButtonState(response[3], true);
+                pressedFirstButtonID = response[3];  
             }
-        } else {
-            // No button pressed -> Release previous button
-            if (pressedFirstButtonID != 0) {
-                handleFirstButtonRelease(pressedFirstButtonID);
-                pressedFirstButtonID = 0;
-            }
+        } else if (pressedFirstButtonID != 0) {
+            handleButtonState(pressedFirstButtonID, false);
+            pressedFirstButtonID = 0;
         }
+
         if (response[4] != 0) {
-            if (pressedSecondButtonID != response[4]) {  // Only press if new button detected
-                handleSecondButtonPress(response[4]);
-                pressedSecondButtonID = response[4];  // Store current button
+            if (pressedSecondButtonID != response[4]) {  
+                handleButtonState(response[4], true);
+                pressedSecondButtonID = response[4];  
             }
-        } else {
-            // No button pressed -> Release previous button
-            if (pressedSecondButtonID != 0) {
-                handleSecondButtonRelease(pressedSecondButtonID);
-                pressedSecondButtonID = 0;
-            }
+        } else if (pressedSecondButtonID != 0) {
+            handleButtonState(pressedSecondButtonID, false);
+            pressedSecondButtonID = 0;
         }
-    } else if (response[1] == 0xCF) {
+    } 
+    else if (response[1] == 0xCF) {
         if (response[4] != 0x80) {
-            if (pressedAccButtonID != response[4]) {  // Only press if new button detected
-                handleAccButtonPress(response[4]);
-                pressedAccButtonID = response[4];  // Store current button
+            if (pressedAccButtonID != response[4]) {  
+                handleButtonState(response[4], true);
+                pressedAccButtonID = response[4];  
             }
-        } else {
-            // No button pressed -> Release previous button
-            if (pressedAccButtonID != 0x80) {
-                handleAccButtonRelease(pressedAccButtonID);
-                pressedAccButtonID = 0x80;
-            }
+        } else if (pressedAccButtonID != 0x80) {
+            handleButtonState(pressedAccButtonID, false);
+            pressedAccButtonID = 0x80;
         }
     }
+  
 
     // if (response[1] == 0x8E) {
     //     if (response[3] != 0) {

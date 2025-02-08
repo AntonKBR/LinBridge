@@ -23,11 +23,6 @@ extern ButtonMapping buttonMappings[];
 // Function Declarations (only declarations here!)
 void setupButtons();
 int getButtonPin(uint8_t btnID);
-void handleFirstButtonPress(uint8_t btnID);
-void handleFirstButtonRelease(uint8_t btnID);
-void handleSecondButtonPress(uint8_t btnID);
-void handleSecondButtonRelease(uint8_t btnID);
-void handleAccButtonPress(uint8_t btnID);
-void handleAccButtonRelease(uint8_t btnID);
+void handleButtonState(uint8_t btnID, bool press);
 
 #endif // BUTTON_HANDLER_H
