@@ -1,5 +1,6 @@
-#include "lin_lib.h"
-#include "can_lib.h"
+#include "./src/lin/lin_lib.h"
+#include "./src/can/can_lib.h"
+#include "./src/btn_press_handler/btn_handler.h"
 
 // Constants for LIN communication
 #define NSLP_PIN 4
@@ -22,14 +23,7 @@ void setup() {
     pinMode(NSLP_PIN, OUTPUT);  // Configure NSLP_PIN as output
     digitalWrite(NSLP_PIN, HIGH);  // Set NSLP_PIN to HIGH for normal operation
 
-     // Set MFA button pins as OUTPUT and initialize to LOW
-    pinMode(MFA_UP_PIN, OUTPUT);
-    pinMode(MFA_DOWN_PIN, OUTPUT);
-    pinMode(MFA_RESET_PIN, OUTPUT);
-
-    digitalWrite(MFA_UP_PIN, LOW);
-    digitalWrite(MFA_DOWN_PIN, LOW);
-    digitalWrite(MFA_RESET_PIN, LOW);
+    setupButtons();  // Setup GPIO pins for buttons
 
     uartSetup();  // Setup UART for LIN communication
     LOG("LIN Bridge Initialized");

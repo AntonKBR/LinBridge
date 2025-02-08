@@ -1,5 +1,6 @@
 #include "lin_lib.h"
-#include "can_lib.h"
+#include "../can/can_lib.h"
+#include "../btn_press_handler/btn_handler.h"
 
 
 // Instantiate the SerialLIN object
@@ -154,11 +155,6 @@ void sendAccRequestFrame() {
     SerialLIN.flush();  // Ensure all data is transmitted before continuing
 }
 
-void pressMFAButton(int buttonPin) {
-    digitalWrite(buttonPin, HIGH);  // Press button (simulate short to ground)
-    delay(100);  // Hold button for 100ms 
-    digitalWrite(buttonPin, LOW);  // Release button
-}
 
 void listenForResponse(byte *response, int &index) {
     unsigned long startTime = millis();
@@ -199,9 +195,27 @@ void listenForResponse(byte *response, int &index) {
 void parseResponse(byte *response, int length) {
   static unsigned long lastTransmitTime = 0;
     unsigned long currentTime = millis();
+    static byte pressedButtonID = 0;
 
     if (currentTime - lastTransmitTime < 1000) {  // Ensure at least 1 second between transmissions
         return;  // Skip this transmission
+    }
+
+
+    if (response[1] == 0x8E) {
+        if (response[3] != 0) {
+
+            if (pressedButtonID != response[3]) {  // Only press if new button detected
+                handleButtonPress(response[3]);
+                pressedButtonID = response[3];  // Store current button
+            }
+        } else {
+            // No button pressed -> Release previous button
+            if (pressedButtonID != 0) {
+                handleButtonRelease(pressedButtonID);
+                pressedButtonID = 0;
+            }
+        }
     }
 
     if (response[1] == 0x8E) {
@@ -209,14 +223,6 @@ void parseResponse(byte *response, int length) {
           //translateToCan(response);
             Serial.print("Button 1: ");
             Serial.print(getButtonName(response[3]));
-
-            if (response[3] == 0x04) {
-                pressMFAButton(MFA_UP_PIN);  // Simulate MFA UP button
-            } else if (response[3] == 0x05) {
-                pressMFAButton(MFA_DOWN_PIN);  // Simulate MFA DOWN button
-            } else if (response[3] == 0x07) {
-                pressMFAButton(MFA_RESET_PIN);  // Simulate MFA RESET button
-            }
 
             if (response[4] != 0) {
                 Serial.print(" + Button 2: ");
