@@ -4,7 +4,10 @@
 ButtonMapping buttonMappings[] = {
     {0x04, MFA_UP_PIN},
     {0x05, MFA_DOWN_PIN},
-    {0x07, MFA_RESET_PIN}
+    {0x07, MFA_RESET_PIN},
+    {0x82, ACC_SPEED_UP_PIN},
+    {0x84, ACC_SPEED_DOWN_PIN},
+    {0x81, ACC_SET_PIN}
 };
 
 // Setup Button Pins
@@ -51,6 +54,22 @@ void handleSecondButtonPress(uint8_t btnID) {
 
 // Handle Second Button Release
 void handleSecondButtonRelease(uint8_t btnID) {
+    int pin = getButtonPin(btnID);
+    if (pin != -1) {
+        digitalWrite(pin, LOW);
+    }
+}
+
+// Handle ACC Button Press
+void handleAccButtonPress(uint8_t btnID) {
+    int pin = getButtonPin(btnID);
+    if (pin != -1) {
+        digitalWrite(pin, HIGH);
+    }
+}
+
+// Handle ACC Button Release
+void handleAccButtonRelease(uint8_t btnID) {
     int pin = getButtonPin(btnID);
     if (pin != -1) {
         digitalWrite(pin, LOW);

@@ -198,6 +198,7 @@ void parseResponse(byte *response, int length) {
     unsigned long currentTime = millis();
     static byte pressedFirstButtonID = 0;
     static byte pressedSecondButtonID = 0;
+    static byte pressedAccButtonID = 0x80;
 
     if (currentTime - lastTransmitTime < 1000) {  // Ensure at least 1 second between transmissions
         return;  // Skip this transmission
@@ -206,7 +207,6 @@ void parseResponse(byte *response, int length) {
 
     if (response[1] == 0x8E) {
         if (response[3] != 0) {
-
             if (pressedFirstButtonID != response[3]) {  // Only press if new button detected
                 handleFirstButtonPress(response[3]);
                 pressedFirstButtonID = response[3];  // Store current button
@@ -230,46 +230,59 @@ void parseResponse(byte *response, int length) {
                 pressedSecondButtonID = 0;
             }
         }
-    }
-
-    if (response[1] == 0x8E) {
-        if (response[3] != 0) {
-          //translateToCan(response);
-            Serial.print("Button 1: ");
-            Serial.print(getButtonName(response[3]));
-
-            if (response[4] != 0) {
-                Serial.print(" + Button 2: ");
-                Serial.print(getButtonName(response[4]));
-            }
-            Serial.print(" Status: ");
-            Serial.print(String(response[5], HEX));
-            Serial.println();
-        }
-        if (response[7] != 0) {
-            Serial.print("Shifter 7: ");
-            for (int i = 0; i < 10; i++) {
-                Serial.print(" ");
-                Serial.print(String(response[i], HEX));
-            }
-            Serial.println();
-        }
-        if (response[8] != 0) {
-            Serial.print("Shifter 8: ");
-            Serial.println(getShifterName(response[8]));
-        }
-        if (response[9] != 0) {
-            Serial.print("Horn: ");
-            Serial.println(String(response[9] == 0x01, HEX));
-        }
     } else if (response[1] == 0xCF) {
         if (response[4] != 0x80) {
-            Serial.print("ACC Button: ");
-            Serial.println(getAccButtonName(response[4]));
-        }
-        if (response[5] != 0x2B) {
-            Serial.print("ACC State: ");
-            Serial.println(getAccStateName(response[5]));
+            if (pressedAccButtonID != response[4]) {  // Only press if new button detected
+                handleAccButtonPress(response[4]);
+                pressedAccButtonID = response[4];  // Store current button
+            }
+        } else {
+            // No button pressed -> Release previous button
+            if (pressedAccButtonID != 0x80) {
+                handleAccButtonRelease(pressedAccButtonID);
+                pressedAccButtonID = 0x80;
+            }
         }
     }
+
+    // if (response[1] == 0x8E) {
+    //     if (response[3] != 0) {
+    //         translateToCan(response);
+    //         Serial.print("Button 1: ");
+    //         Serial.print(getButtonName(response[3]));
+
+    //         if (response[4] != 0) {
+    //             Serial.print(" + Button 2: ");
+    //             Serial.print(getButtonName(response[4]));
+    //         }
+    //         Serial.print(" Status: ");
+    //         Serial.print(String(response[5], HEX));
+    //         Serial.println();
+    //     }
+    //     if (response[7] != 0) {
+    //         Serial.print("Shifter 7: ");
+    //         for (int i = 0; i < 10; i++) {
+    //             Serial.print(" ");
+    //             Serial.print(String(response[i], HEX));
+    //         }
+    //         Serial.println();
+    //     }
+    //     if (response[8] != 0) {
+    //         Serial.print("Shifter 8: ");
+    //         Serial.println(getShifterName(response[8]));
+    //     }
+    //     if (response[9] != 0) {
+    //         Serial.print("Horn: ");
+    //         Serial.println(String(response[9] == 0x01, HEX));
+    //     }
+    // } else if (response[1] == 0xCF) {
+    //     if (response[4] != 0x80) {
+    //         Serial.print("ACC Button: ");
+    //         Serial.println(getAccButtonName(response[4]));
+    //     }
+    //     if (response[5] != 0x2B) {
+    //         Serial.print("ACC State: ");
+    //         Serial.println(getAccStateName(response[5]));
+    //     }
+    // }
 }

@@ -4,7 +4,10 @@
 #include <Arduino.h>
 
 // Define GPIO pins for buttons
-#define MFA_UP_PIN       9  // Example GPIO
+#define ACC_SPEED_UP_PIN  12
+#define ACC_SPEED_DOWN_PIN 11
+#define ACC_SET_PIN       10
+#define MFA_UP_PIN       9  
 #define MFA_DOWN_PIN     8
 #define MFA_RESET_PIN    7
 
@@ -24,5 +27,7 @@ void handleFirstButtonPress(uint8_t btnID);
 void handleFirstButtonRelease(uint8_t btnID);
 void handleSecondButtonPress(uint8_t btnID);
 void handleSecondButtonRelease(uint8_t btnID);
+void handleAccButtonPress(uint8_t btnID);
+void handleAccButtonRelease(uint8_t btnID);
 
 #endif // BUTTON_HANDLER_H
