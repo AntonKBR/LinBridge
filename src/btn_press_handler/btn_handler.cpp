@@ -26,7 +26,7 @@ int getButtonPin(uint8_t btnID) {
 }
 
 // Handle Button Press
-void handleButtonPress(uint8_t btnID) {
+void handleFirstButtonPress(uint8_t btnID) {
     int pin = getButtonPin(btnID);
     if (pin != -1) {
         digitalWrite(pin, HIGH);
@@ -34,7 +34,23 @@ void handleButtonPress(uint8_t btnID) {
 }
 
 //Handle Button Release
-void handleButtonRelease(uint8_t btnID) {
+void handleFirstButtonRelease(uint8_t btnID) {
+    int pin = getButtonPin(btnID);
+    if (pin != -1) {
+        digitalWrite(pin, LOW);
+    }
+}
+
+// Handle Second Button Press
+void handleSecondButtonPress(uint8_t btnID) {
+    int pin = getButtonPin(btnID);
+    if (pin != -1) {
+        digitalWrite(pin, HIGH);
+    }
+}
+
+// Handle Second Button Release
+void handleSecondButtonRelease(uint8_t btnID) {
     int pin = getButtonPin(btnID);
     if (pin != -1) {
         digitalWrite(pin, LOW);

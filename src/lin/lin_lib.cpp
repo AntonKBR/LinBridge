@@ -117,7 +117,8 @@ void sendIgnitionFrame() {
     // Step 2: Prepare LIN frame data
     byte rawId = 0x0D;  // LIN frame ID for ignition
     byte pid = calculateParity(rawId);  // Calculate parity for the frame ID
-    byte data[] = {backlight, 0xFF, 0xFF, 0xFF};  // Data with dynamic backlight value
+    //byte data[] = {backlight, 0xFF, 0xFF, 0xFF};  // Data with dynamic backlight value
+    byte data[] = {0x64, 0xFF, 0xFF, 0xFF};  // Data with fixed backlight value 0x64 == 100% brightness
     byte checksum = calculateEnhancedChecksum(pid, data, sizeof(data));  // Calculate checksum
 
     // Step 3: Send the LIN frame
@@ -195,7 +196,8 @@ void listenForResponse(byte *response, int &index) {
 void parseResponse(byte *response, int length) {
   static unsigned long lastTransmitTime = 0;
     unsigned long currentTime = millis();
-    static byte pressedButtonID = 0;
+    static byte pressedFirstButtonID = 0;
+    static byte pressedSecondButtonID = 0;
 
     if (currentTime - lastTransmitTime < 1000) {  // Ensure at least 1 second between transmissions
         return;  // Skip this transmission
@@ -205,15 +207,27 @@ void parseResponse(byte *response, int length) {
     if (response[1] == 0x8E) {
         if (response[3] != 0) {
 
-            if (pressedButtonID != response[3]) {  // Only press if new button detected
-                handleButtonPress(response[3]);
-                pressedButtonID = response[3];  // Store current button
+            if (pressedFirstButtonID != response[3]) {  // Only press if new button detected
+                handleFirstButtonPress(response[3]);
+                pressedFirstButtonID = response[3];  // Store current button
             }
         } else {
             // No button pressed -> Release previous button
-            if (pressedButtonID != 0) {
-                handleButtonRelease(pressedButtonID);
-                pressedButtonID = 0;
+            if (pressedFirstButtonID != 0) {
+                handleFirstButtonRelease(pressedFirstButtonID);
+                pressedFirstButtonID = 0;
+            }
+        }
+        if (response[4] != 0) {
+            if (pressedSecondButtonID != response[4]) {  // Only press if new button detected
+                handleSecondButtonPress(response[4]);
+                pressedSecondButtonID = response[4];  // Store current button
+            }
+        } else {
+            // No button pressed -> Release previous button
+            if (pressedSecondButtonID != 0) {
+                handleSecondButtonRelease(pressedSecondButtonID);
+                pressedSecondButtonID = 0;
             }
         }
     }
