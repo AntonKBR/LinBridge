@@ -2,6 +2,16 @@
 #include "./src/can/can_lib.h"
 #include "./src/btn_press_handler/btn_handler.h"
 
+#include <WiFi.h>
+#include <ESPAsyncWebServer.h>
+
+// WiFi Credentials
+const char *ssid = "LinBridge";
+const char *password = "12345678";
+
+// Create AsyncWebServer object on port 80
+AsyncWebServer server(80);
+
 // Constants for LIN communication
 #define NSLP_PIN 4
 
@@ -20,14 +30,29 @@ void setup() {
     while (!Serial);
 
     // Set NSLP pin to HIGH to enable the TJA1020 transceiver
-    pinMode(NSLP_PIN, OUTPUT);  // Configure NSLP_PIN as output
-    digitalWrite(NSLP_PIN, HIGH);  // Set NSLP_PIN to HIGH for normal operation
+    pinMode(NSLP_PIN, OUTPUT);  
+    digitalWrite(NSLP_PIN, HIGH);  
 
     setupButtons();  // Setup GPIO pins for buttons
 
-    uartSetup();  // Setup UART for LIN communication
+    uartSetup();  
     LOG("LIN Bridge Initialized");
-    canInit();  // Initialize CAN interface
+    canInit();  
+
+    // Start WiFi in Access Point mode
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(ssid, password);
+
+    Serial.println("WiFi AP Started!");
+    Serial.println(WiFi.softAPIP());  // Print AP IP Address
+
+    // Serve a simple web page
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html", "<h1>Hello LinBridge!!!</h1>");
+    });
+
+    // Start server
+    server.begin();
 }
 
 void loop() {
