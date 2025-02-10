@@ -24,5 +24,6 @@ extern ButtonMapping buttonMappings[];
 void setupButtons();
 int getButtonPin(uint8_t btnID);
 void handleButtonState(uint8_t btnID, bool press);
+String getButtonLogs();
 
 #endif // BUTTON_HANDLER_H

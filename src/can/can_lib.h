@@ -4,8 +4,8 @@
 #include <Arduino.h>
 #include <ESP32-TWAI-CAN.hpp>
 
-#define CAN_TX GPIO_NUM_5
-#define CAN_RX GPIO_NUM_6
+#define CAN_TX GPIO_NUM_6
+#define CAN_RX GPIO_NUM_5
 #define CAN_ID 0x5BF
 
 

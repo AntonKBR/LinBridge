@@ -6,8 +6,13 @@
 
 extern HardwareSerial SerialLIN;  // Use UART1 for LIN (declaration only)
 
+//LinBridge v1.*
 #define LIN_TX_PIN 2  
 #define LIN_RX_PIN 3
+
+//LinBridge v2.*
+//#define LIN_TX_PIN 3  
+//#define LIN_RX_PIN 4
 
 #define BACKLIGHT_PIN 13  // GPIO connected to voltage divider
 

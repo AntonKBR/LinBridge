@@ -5,11 +5,9 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 
-// WiFi Credentials
 const char *ssid = "LinBridge";
 const char *password = "12345678";
 
-// Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
 
 // Constants for LIN communication
@@ -25,33 +23,46 @@ AsyncWebServer server(80);
 #define LOGV(x)
 #endif
 
+// Storage for button press logs
+String buttonLog = "";
+
+void logButtonPress(const char *buttonName) {
+    String logEntry = String(millis() / 1000) + "s: " + buttonName + "<br>";
+    buttonLog = logEntry + buttonLog;
+    if (buttonLog.length() > 2000) {  // Prevent memory overflow
+        buttonLog = buttonLog.substring(0, 2000);
+    }
+}
+
 void setup() {
     Serial.begin(115200);
     while (!Serial);
 
-    // Set NSLP pin to HIGH to enable the TJA1020 transceiver
-    pinMode(NSLP_PIN, OUTPUT);  
-    digitalWrite(NSLP_PIN, HIGH);  
+    pinMode(NSLP_PIN, OUTPUT);
+    digitalWrite(NSLP_PIN, HIGH);
 
-    setupButtons();  // Setup GPIO pins for buttons
-
-    uartSetup();  
+    setupButtons();
+    uartSetup();
     LOG("LIN Bridge Initialized");
-    canInit();  
+    canInit();
 
-    // Start WiFi in Access Point mode
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
+    Serial.println("WiFi AP Started! Visit http://192.168.4.1");
 
-    Serial.println("WiFi AP Started!");
-    Serial.println(WiFi.softAPIP());  // Print AP IP Address
-
-    // Serve a simple web page
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/html", "<h1>Hello LinBridge!!!</h1>");
+    // Serve logs
+    server.on("/log", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html", getButtonLogs());
     });
 
-    // Start server
+    // Serve homepage with auto-refresh logs
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html",
+                      "<h1>LinBridge Logs</h1>"
+                      "<div id='log'></div>"
+                      "<script>setInterval(()=>{fetch('/log').then(res=>res.text()).then(txt=>document.getElementById('log').innerHTML=txt)}, 1000);</script>");
+    });
+
     server.begin();
 }
 
