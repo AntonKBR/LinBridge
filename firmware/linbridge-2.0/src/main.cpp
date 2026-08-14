@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include "linbridge/board_config.h"
 #include "linbridge/feature_flags.h"
 
 static_assert(!linbridge::features::kLin);

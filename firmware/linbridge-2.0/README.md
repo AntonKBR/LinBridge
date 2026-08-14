@@ -16,6 +16,10 @@ All runtime features are disabled in `include/linbridge/feature_flags.h`. They
 must be enabled only by a later migration stage with the required evidence and
 tests.
 
+The intended GPIO1-GPIO13 mapping is defined in
+`include/linbridge/board_config.h`. Its evidence boundaries and explicit
+exclusions are recorded in [`docs/pinout-evidence.md`](docs/pinout-evidence.md).
+
 ## Build
 
 PlatformIO Core 6.1 or later is required. From this directory run:
