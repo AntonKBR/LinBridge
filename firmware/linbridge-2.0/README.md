@@ -1,8 +1,32 @@
 # LinBridge 2.0 firmware
 
-Canonical firmware pending identification and verification.
+This directory contains the PlatformIO scaffold for the future canonical
+LinBridge 2.0 firmware. It targets only the square, two-layer LinBridge 2.0 PCB.
+The historical narrow prototype remains under `firmware/legacy/` and is not a
+supported target of this project.
 
-This directory intentionally contains no implementation yet. A firmware version
-will become canonical only after its pinout is reconciled with the square
-LinBridge 2.0 PCB and its confirmed LIN behavior is reproduced on the assembled
-board. Folder age or a successful build alone is not sufficient evidence.
+## Current migration stage
+
+Only the build foundation is present. No LIN polling, output routing, CAN,
+KEY1/KEY2, CCS, illumination control, Wi-Fi or web behavior has been migrated.
+A successful scaffold build is not evidence that a pinout or hardware function
+has been validated.
+
+All runtime features are disabled in `include/linbridge/feature_flags.h`. They
+must be enabled only by a later migration stage with the required evidence and
+tests.
+
+## Build
+
+PlatformIO Core 6.1 or later is required. From this directory run:
+
+```sh
+pio run
+```
+
+The Espressif32 platform version is pinned in `platformio.ini`. The provisional
+`esp32-s3-devkitc-1` board definition is used only to compile for the same MCU
+family as the ESP32-S3-Zero module. It does not define or validate the canonical
+LinBridge 2.0 GPIO mapping.
+
+No upload target or upload procedure is defined at this stage.
