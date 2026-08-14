@@ -2,6 +2,7 @@
 #include <cstdint>
 
 #include "linbridge/lin/protocol.h"
+#include "linbridge/lin/response.h"
 #include "linbridge/lin/validator.h"
 
 namespace {
@@ -26,6 +27,15 @@ RawFrame makeSyntheticFrame(const FrameSpec& spec) {
                                                spec.dataLength)
             : linbridge::lin::classicChecksum(data, spec.dataLength);
     frame.push(checksum);
+    return frame;
+}
+
+template <std::size_t Size>
+RawFrame makeCapturedFrame(const std::uint8_t (&bytes)[Size]) {
+    RawFrame frame;
+    for (const std::uint8_t value : bytes) {
+        assert(frame.push(value));
+    }
     return frame;
 }
 
@@ -91,6 +101,49 @@ int main() {
     const RawFrame classic = makeSyntheticFrame(classicSpec);
     assert(linbridge::lin::validate(classic, classicSpec) ==
            ValidationError::kNone);
+
+    // Retained bench captures, reduced to protocol test vectors. Each frame is
+    // sync + PID + eight data bytes + enhanced checksum.
+    const std::uint8_t idleButtonBytes[] = {
+        0x55, 0x8E, 0x10, 0x00, 0x00, 0x00,
+        0x90, 0x00, 0x00, 0x00, 0xD0,
+    };
+    const RawFrame idleButton = makeCapturedFrame(idleButtonBytes);
+    assert(linbridge::lin::validate(idleButton,
+                                    linbridge::lin::kButtonResponseSpec) ==
+           ValidationError::kNone);
+    linbridge::lin::ButtonResponse buttonResponse{};
+    assert(linbridge::lin::decodeButtonResponse(idleButton, buttonResponse));
+    assert(buttonResponse.sequenceCounter == 0x10);
+    assert(buttonResponse.isNeutral());
+
+    const std::uint8_t idleAccBytes[] = {
+        0x55, 0xCF, 0xD2, 0x40, 0x80, 0x2B,
+        0x00, 0x00, 0x00, 0x00, 0x71,
+    };
+    const RawFrame idleAcc = makeCapturedFrame(idleAccBytes);
+    assert(linbridge::lin::validate(idleAcc,
+                                    linbridge::lin::kAccResponseSpec) ==
+           ValidationError::kNone);
+    linbridge::lin::AccResponse accResponse{};
+    assert(linbridge::lin::decodeAccResponse(idleAcc, accResponse));
+    assert(accResponse.unknown0 == 0xD2);
+    assert(accResponse.sequenceCounter == 0x40);
+    assert(accResponse.isNeutral());
+
+    const std::uint8_t activeAccBytes[] = {
+        0x55, 0xCF, 0x21, 0x46, 0xB0, 0x2B,
+        0x00, 0x00, 0x00, 0x00, 0xEC,
+    };
+    const RawFrame activeAcc = makeCapturedFrame(activeAccBytes);
+    assert(linbridge::lin::decodeAccResponse(activeAcc, accResponse));
+    assert(accResponse.sequenceCounter == 0x46);
+    assert(accResponse.buttonState == 0xB0);
+    assert(!accResponse.isNeutral());
+
+    RawFrame corruptedCapture = activeAcc;
+    corruptedCapture.bytes[corruptedCapture.length - 1] ^= 0x01;
+    assert(!linbridge::lin::decodeAccResponse(corruptedCapture, accResponse));
 
     return 0;
 }

@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "linbridge/lin/frame.h"
+
 namespace linbridge::lin {
 
 inline constexpr std::uint32_t kBaudRate = 19'200;
@@ -16,6 +18,8 @@ inline constexpr std::uint8_t kSyncByte = 0x55;
 inline constexpr std::uint8_t kIlluminationIdentifier = 0x0D;
 inline constexpr std::uint8_t kButtonIdentifier = 0x0E;
 inline constexpr std::uint8_t kAccIdentifier = 0x0F;
+inline constexpr std::size_t kButtonResponseDataLength = 8;
+inline constexpr std::size_t kAccResponseDataLength = 8;
 
 inline constexpr std::uint8_t kFixedIllumination = 0x64;
 inline constexpr std::array<std::uint8_t, 4> kFixedIlluminationPayload = {
@@ -58,5 +62,17 @@ static_assert(protectedIdentifier(kAccIdentifier) == 0xCF);
 static_assert(enhancedChecksum(protectedIdentifier(kIlluminationIdentifier),
                               kFixedIlluminationPayload.data(),
                               kFixedIlluminationPayload.size()) == 0x8E);
+
+inline constexpr FrameSpec kButtonResponseSpec{
+    protectedIdentifier(kButtonIdentifier),
+    kButtonResponseDataLength,
+    ChecksumModel::kEnhanced,
+};
+
+inline constexpr FrameSpec kAccResponseSpec{
+    protectedIdentifier(kAccIdentifier),
+    kAccResponseDataLength,
+    ChecksumModel::kEnhanced,
+};
 
 }  // namespace linbridge::lin

@@ -8,9 +8,10 @@ supported target of this project.
 ## Current migration stage
 
 The build foundation, board configuration and dormant LIN transport are
-present. Receive buffering and validation are implemented, but button/ACC frame
-profiles, decoding and polling are not active. No output routing, CAN,
-KEY1/KEY2, CCS, automatic illumination, Wi-Fi or web behavior has been migrated.
+present. Receive buffering, evidence-backed button/ACC frame profiles,
+validation and minimal field decoding are implemented, but polling is not
+active. No output routing, CAN, KEY1/KEY2, CCS, automatic illumination, Wi-Fi
+or web behavior has been migrated.
 A successful build is not evidence that a hardware function has been validated.
 
 All runtime features are disabled in `include/linbridge/feature_flags.h`. They
@@ -45,9 +46,12 @@ The LIN validator test has no Arduino dependency and runs without hardware:
 ```sh
 c++ -std=c++17 -Wall -Wextra -Werror -Iinclude \
     test/host/lin_validator_test.cpp src/lin/validator.cpp \
+    src/lin/response.cpp \
     -o /tmp/linbridge-lin-validator-test
 /tmp/linbridge-lin-validator-test
 ```
 
-The test uses synthetic frames to verify validator behavior. It does not define
-the still-unverified button or ACC payload lengths.
+The test combines synthetic failure cases with minimal, hexadecimal regression
+vectors derived from retained bench captures. It verifies the button and ACC
+response lengths, enhanced checksums, neutral states and established counter
+positions without importing the private archive into the repository.
