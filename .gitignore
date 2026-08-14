@@ -1,1 +1,75 @@
-*vscode
+# macOS
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.code-workspace
+
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+.platformio/
+libdeps/
+
+# Arduino and embedded build output
+build/
+out/
+dist/
+*.bin
+*.elf
+*.hex
+*.map
+*.o
+*.a
+*.d
+
+# Logs and temporary files
+tmp/
+*.log
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+*.cache
+
+# Python helper tooling
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment files and credentials
+.env
+.env.*
+!.env.example
+secrets.*
+credentials.*
+*.pem
+*.key
+
+# Local hardware-tool state
+*.autosave
+*.lck
+*-backups/
+fp-info-cache
+
+# Private research sources retained locally for traceability
+docs/research/source-archive/
+docs/research/appendices/local-source-inventory.tsv
+docs/research/appendices/source-register.md
+private/
+private-archive/
+LinBridge-private-archive/
+
+# Publish only reviewed and sanitized captures
+test-data/raw/
+captures/raw/

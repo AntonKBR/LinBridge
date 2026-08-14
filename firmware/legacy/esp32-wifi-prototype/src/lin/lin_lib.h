@@ -6,15 +6,22 @@
 
 extern HardwareSerial SerialLIN;  // Use UART1 for LIN (declaration only)
 
-// Constants for LIN communication
+//LinBridge v1.*
 #define LIN_TX_PIN 2  
 #define LIN_RX_PIN 3
 
-#define LIN_TIMEOUT 50  // Timeout for LIN response in milliseconds
+//LinBridge v2.*
+//#define LIN_TX_PIN 3  
+//#define LIN_RX_PIN 4
+
+#define BACKLIGHT_PIN 13  // GPIO connected to voltage divider
+
+#define LIN_TIMEOUT 40  // Timeout for LIN response in milliseconds
 #define BUFFER_SIZE 16   // Buffer size for LIN response
 
 // Function Declarations
 void uartSetup(); 
+void canInit();
 void sendBreakSignal();
 byte calculateParity(byte id);
 byte calculateEnhancedChecksum(byte pid, byte* data, int length);
