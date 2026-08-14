@@ -40,7 +40,8 @@ Data offsets below exclude the sync byte and PID.
 | Response | Data byte | Meaning retained for this stage |
 | --- | ---: | --- |
 | Button (`0x8E`) | 0 | rolling sequence counter |
-| Button (`0x8E`) | 1 | button code; `0x00` is neutral |
+| Button (`0x8E`) | 1 | first button code; `0x00` is neutral |
+| Button (`0x8E`) | 2 | second button code; `0x00` is neutral |
 | ACC (`0xCF`) | 0 | unknown; values vary between otherwise equivalent captures |
 | ACC (`0xCF`) | 1 | rolling sequence counter (`0x40` through `0x4F` observed) |
 | ACC (`0xCF`) | 2 | button state; `0x80` is neutral |
@@ -62,10 +63,10 @@ Response windows never busy-wait; the existing bounded break generation and
 UART transmit flush still complete inside their respective send calls.
 
 1. discard stale receive bytes and send the illumination frame;
-2. discard illumination echo, send the button request and open a 40 ms window;
-3. collect and validate the button response;
+2. discard illumination echo, send the button request and open a full 40 ms window;
+3. collect throughout the window, then validate the button response;
 4. discard stale bytes, send the ACC request and open a 40 ms window;
-5. collect and validate the ACC response, then repeat.
+5. collect throughout the full 40 ms window, validate the ACC response, then repeat.
 
 An empty response window increments the channel timeout counter. A partial,
 overlong or otherwise invalid response is reported through the corresponding

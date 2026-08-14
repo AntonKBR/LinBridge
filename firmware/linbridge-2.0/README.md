@@ -24,6 +24,8 @@ The intended GPIO1-GPIO13 mapping is defined in
 exclusions are recorded in [`docs/pinout-evidence.md`](docs/pinout-evidence.md).
 The reproduced LIN constants and polling order are recorded in
 [`docs/lin-timing-contract.md`](docs/lin-timing-contract.md).
+The behavior that must remain compatible with the working prototype is recorded
+in [`docs/lin-legacy-parity.md`](docs/lin-legacy-parity.md).
 
 ## Build
 
@@ -56,9 +58,15 @@ c++ -std=c++17 -Wall -Wextra -Werror -Iinclude \
     src/lin/validator.cpp src/lin/response.cpp \
     -o /tmp/linbridge-lin-master-test
 /tmp/linbridge-lin-master-test
+
+c++ -std=c++17 -Wall -Wextra -Werror -Iinclude \
+    test/host/lin_legacy_parity_test.cpp src/lin/button_events.cpp \
+    -o /tmp/linbridge-lin-legacy-parity-test
+/tmp/linbridge-lin-legacy-parity-test
 ```
 
-The test combines synthetic failure cases with minimal, hexadecimal regression
-vectors derived from retained bench captures. It verifies the button and ACC
-response lengths, enhanced checksums, neutral states and established counter
-positions without importing the private archive into the repository.
+The tests combine synthetic failure cases, minimal hexadecimal regression
+vectors derived from retained bench captures, and golden legacy behavior
+scenarios. They verify response profiles, checksums, counters, receive-window
+timing and button state transitions without importing the private archive into
+the repository.

@@ -8,9 +8,12 @@ namespace linbridge::lin {
 
 struct ButtonResponse {
     std::uint8_t sequenceCounter;
-    std::uint8_t buttonCode;
+    std::uint8_t firstButtonCode;
+    std::uint8_t secondButtonCode;
 
-    constexpr bool isNeutral() const { return buttonCode == 0x00; }
+    constexpr bool isNeutral() const {
+        return firstButtonCode == 0x00 && secondButtonCode == 0x00;
+    }
 };
 
 struct AccResponse {

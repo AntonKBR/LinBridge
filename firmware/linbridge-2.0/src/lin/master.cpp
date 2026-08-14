@@ -110,10 +110,13 @@ PollResult Master::poll(const std::uint32_t nowMillis) {
 
         case State::kAwaitButtonResponse:
             drainReceive();
-            if (received_.overflow || received_.length >= kResponseFrameLength) {
+            if (received_.overflow) {
                 return finishButtons();
             }
             if (deadlineReached(nowMillis, responseDeadline_)) {
+                if (received_.length >= kResponseFrameLength) {
+                    return finishButtons();
+                }
                 if (received_.length > 0) {
                     return finishButtons();
                 }
@@ -128,10 +131,13 @@ PollResult Master::poll(const std::uint32_t nowMillis) {
 
         case State::kAwaitAccResponse:
             drainReceive();
-            if (received_.overflow || received_.length >= kResponseFrameLength) {
+            if (received_.overflow) {
                 return finishAcc();
             }
             if (deadlineReached(nowMillis, responseDeadline_)) {
+                if (received_.length >= kResponseFrameLength) {
+                    return finishAcc();
+                }
                 if (received_.length > 0) {
                     return finishAcc();
                 }

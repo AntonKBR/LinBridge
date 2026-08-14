@@ -17,7 +17,8 @@ bool decodeButtonResponse(const RawFrame& frame, ButtonResponse& response) {
     }
 
     response.sequenceCounter = frame.bytes[kDataOffset];
-    response.buttonCode = frame.bytes[kDataOffset + 1];
+    response.firstButtonCode = frame.bytes[kDataOffset + 1];
+    response.secondButtonCode = frame.bytes[kDataOffset + 2];
     return true;
 }
 

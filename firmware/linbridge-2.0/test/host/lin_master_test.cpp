@@ -91,15 +91,17 @@ int main() {
 
     assert(master.poll(1).event == PollEvent::kNone);
     assert(transport.lastHeader == linbridge::lin::kButtonIdentifier);
-    const linbridge::lin::PollResult buttons = master.poll(2);
+    assert(master.poll(2).event == PollEvent::kNone);
+    const linbridge::lin::PollResult buttons = master.poll(41);
     assert(buttons.event == PollEvent::kResponseAccepted);
     assert(buttons.channel == ResponseChannel::kButtons);
     assert(buttons.buttons.sequenceCounter == 0x10);
     assert(buttons.buttons.isNeutral());
 
-    assert(master.poll(3).event == PollEvent::kNone);
+    assert(master.poll(42).event == PollEvent::kNone);
     assert(transport.lastHeader == linbridge::lin::kAccIdentifier);
-    const linbridge::lin::PollResult acc = master.poll(4);
+    assert(master.poll(43).event == PollEvent::kNone);
+    const linbridge::lin::PollResult acc = master.poll(82);
     assert(acc.event == PollEvent::kResponseAccepted);
     assert(acc.channel == ResponseChannel::kAcc);
     assert(acc.acc.sequenceCounter == 0x46);
@@ -108,16 +110,17 @@ int main() {
     assert(master.counters().accValidation.accepted == 1);
 
     transport.serveButtons = false;
-    assert(master.poll(5).event == PollEvent::kNone);
-    assert(master.poll(6).event == PollEvent::kNone);
-    const linbridge::lin::PollResult timeout = master.poll(46);
+    assert(master.poll(83).event == PollEvent::kNone);
+    assert(master.poll(84).event == PollEvent::kNone);
+    const linbridge::lin::PollResult timeout = master.poll(124);
     assert(timeout.event == PollEvent::kResponseTimeout);
     assert(timeout.channel == ResponseChannel::kButtons);
     assert(master.counters().buttonTimeouts == 1);
 
     transport.accFrame.back() ^= 0x01;
-    assert(master.poll(47).event == PollEvent::kNone);
-    const linbridge::lin::PollResult rejected = master.poll(48);
+    assert(master.poll(125).event == PollEvent::kNone);
+    assert(master.poll(126).event == PollEvent::kNone);
+    const linbridge::lin::PollResult rejected = master.poll(165);
     assert(rejected.event == PollEvent::kResponseRejected);
     assert(rejected.channel == ResponseChannel::kAcc);
     assert(rejected.validationError ==
