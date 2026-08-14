@@ -19,6 +19,11 @@ bool decodeButtonResponse(const RawFrame& frame, ButtonResponse& response) {
     response.sequenceCounter = frame.bytes[kDataOffset];
     response.firstButtonCode = frame.bytes[kDataOffset + 1];
     response.secondButtonCode = frame.bytes[kDataOffset + 2];
+    response.firstPressType = frame.bytes[kDataOffset + 3];
+    response.wheelType = frame.bytes[kDataOffset + 4];
+    response.secondPressType = frame.bytes[kDataOffset + 5];
+    response.paddleState = frame.bytes[kDataOffset + 6];
+    response.auxiliaryState = frame.bytes[kDataOffset + 7];
     return true;
 }
 

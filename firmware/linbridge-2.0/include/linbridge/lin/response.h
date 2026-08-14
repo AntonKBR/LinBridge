@@ -10,6 +10,11 @@ struct ButtonResponse {
     std::uint8_t sequenceCounter;
     std::uint8_t firstButtonCode;
     std::uint8_t secondButtonCode;
+    std::uint8_t firstPressType{0};
+    std::uint8_t wheelType{0};
+    std::uint8_t secondPressType{0};
+    std::uint8_t paddleState{0};
+    std::uint8_t auxiliaryState{0};
 
     constexpr bool isNeutral() const {
         return firstButtonCode == 0x00 && secondButtonCode == 0x00;

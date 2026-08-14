@@ -17,6 +17,11 @@ The following behavior comes directly from the retained legacy source:
 | Startup output suppression | first 1,000 ms after boot |
 | First button | raw frame byte 3 / data byte 1; neutral `0x00` |
 | Second button | raw frame byte 4 / data byte 2; neutral `0x00` |
+| First press type | raw frame byte 5 / data byte 3 |
+| Wheel profile | raw frame byte 6 / data byte 4; retained bench wheel `0x90` |
+| Second press type | raw frame byte 7 / data byte 5 |
+| Paddle state | raw frame byte 8 / data byte 6 |
+| Auxiliary state | raw frame byte 9 / data byte 7 |
 | ACC button | raw frame byte 4 / data byte 2; neutral `0x80` |
 | Held button | one press event; repeated frames emit nothing |
 | Release | neutral value releases the remembered code |
@@ -60,3 +65,8 @@ The host parity test covers:
 These tests protect software behavior. A logic-analyzer comparison between the
 legacy and diagnostic new firmware remains required to confirm break timing,
 physical-bus response timing, wake-up and illumination behavior.
+
+The event tracker deliberately still consumes only the two legacy button slots.
+The remaining bytes are now decoded and retained so later paddle, press-duration
+and auxiliary behavior can be implemented without changing the proven legacy
+button transitions prematurely.

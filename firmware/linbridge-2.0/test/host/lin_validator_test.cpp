@@ -116,6 +116,49 @@ int main() {
     assert(linbridge::lin::decodeButtonResponse(idleButton, buttonResponse));
     assert(buttonResponse.sequenceCounter == 0x10);
     assert(buttonResponse.isNeutral());
+    assert(buttonResponse.firstPressType == 0x00);
+    assert(buttonResponse.wheelType == 0x90);
+    assert(buttonResponse.secondPressType == 0x00);
+    assert(buttonResponse.paddleState == 0x00);
+    assert(buttonResponse.auxiliaryState == 0x00);
+
+    // Captured OK press with the right (+) paddle. This protects the complete
+    // eight-byte 0x90 response layout, not only the two legacy button slots.
+    const std::uint8_t okWithRightPaddleBytes[] = {
+        0x55, 0x8E, 0x1C, 0x07, 0x00, 0x01,
+        0x90, 0x00, 0x02, 0x00, 0xBA,
+    };
+    const RawFrame okWithRightPaddle =
+        makeCapturedFrame(okWithRightPaddleBytes);
+    assert(linbridge::lin::decodeButtonResponse(okWithRightPaddle,
+                                                buttonResponse));
+    assert(buttonResponse.sequenceCounter == 0x1C);
+    assert(buttonResponse.firstButtonCode == 0x07);
+    assert(buttonResponse.secondButtonCode == 0x00);
+    assert(buttonResponse.firstPressType == 0x01);
+    assert(buttonResponse.wheelType == 0x90);
+    assert(buttonResponse.secondPressType == 0x00);
+    assert(buttonResponse.paddleState == 0x02);
+    assert(buttonResponse.auxiliaryState == 0x00);
+
+    // The retained real-car A3 capture also uses enhanced checksum. An older
+    // research note labels this frame "classic", but executable arithmetic
+    // proves that claim wrong: classic would produce 0x4C, not 0xBD.
+    const std::uint8_t a3IdleBytes[] = {
+        0x55, 0x8E, 0x10, 0x00, 0x00, 0x00,
+        0xA3, 0x00, 0x00, 0x00, 0xBD,
+    };
+    const RawFrame a3Idle = makeCapturedFrame(a3IdleBytes);
+    const FrameSpec a3ClassicButtonSpec{
+        linbridge::lin::protectedIdentifier(linbridge::lin::kButtonIdentifier),
+        linbridge::lin::kButtonResponseDataLength,
+        ChecksumModel::kClassic,
+    };
+    assert(linbridge::lin::validate(a3Idle,
+                                    linbridge::lin::kButtonResponseSpec) ==
+           ValidationError::kNone);
+    assert(linbridge::lin::validate(a3Idle, a3ClassicButtonSpec) ==
+           ValidationError::kInvalidChecksum);
 
     const std::uint8_t idleAccBytes[] = {
         0x55, 0xCF, 0xD2, 0x40, 0x80, 0x2B,
