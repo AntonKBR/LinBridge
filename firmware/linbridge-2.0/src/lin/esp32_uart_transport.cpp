@@ -43,21 +43,22 @@ void Esp32UartTransport::sendFrame(const std::uint8_t identifier,
     serial_.flush();
 }
 
-bool Esp32UartTransport::receive(RawFrame& frame,
-                                 const std::uint32_t timeoutMillis) {
-    frame.clear();
-    const std::uint32_t startTime = millis();
-
-    while (millis() - startTime < timeoutMillis) {
-        while (serial_.available() > 0) {
-            const int value = serial_.read();
-            if (value >= 0) {
-                frame.push(static_cast<std::uint8_t>(value));
-            }
-        }
+void Esp32UartTransport::clearReceive() {
+    while (serial_.available() > 0) {
+        serial_.read();
     }
+}
 
-    return frame.length > 0 || frame.overflow;
+bool Esp32UartTransport::readByte(std::uint8_t& value) {
+    if (serial_.available() <= 0) {
+        return false;
+    }
+    const int received = serial_.read();
+    if (received < 0) {
+        return false;
+    }
+    value = static_cast<std::uint8_t>(received);
+    return true;
 }
 
 }  // namespace linbridge::lin

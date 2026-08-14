@@ -54,3 +54,21 @@ tests contain only minimal hexadecimal protocol vectors.
 Polling remains disabled until the receive transport, scheduler and application
 event mapping are connected in later stages. The response decoder rejects every
 frame for which validation does not return `kNone`.
+
+## Dormant master polling engine
+
+The compiled polling engine advances by one `poll(nowMillis)` call at a time.
+Response windows never busy-wait; the existing bounded break generation and
+UART transmit flush still complete inside their respective send calls.
+
+1. discard stale receive bytes and send the illumination frame;
+2. discard illumination echo, send the button request and open a 40 ms window;
+3. collect and validate the button response;
+4. discard stale bytes, send the ACC request and open a 40 ms window;
+5. collect and validate the ACC response, then repeat.
+
+An empty response window increments the channel timeout counter. A partial,
+overlong or otherwise invalid response is reported through the corresponding
+validation counter. Accepted responses are returned as diagnostic `PollResult`
+values only; they do not yet produce vehicle commands. The engine is not called
+from `setup()` or `loop()`, and `features::kLin` remains false.

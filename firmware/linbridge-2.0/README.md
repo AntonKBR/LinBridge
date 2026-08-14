@@ -9,9 +9,10 @@ supported target of this project.
 
 The build foundation, board configuration and dormant LIN transport are
 present. Receive buffering, evidence-backed button/ACC frame profiles,
-validation and minimal field decoding are implemented, but polling is not
-active. No output routing, CAN, KEY1/KEY2, CCS, automatic illumination, Wi-Fi
-or web behavior has been migrated.
+validation, minimal field decoding and a dormant incremental master polling
+engine are implemented, but polling is not active. No output routing, CAN,
+KEY1/KEY2, CCS, automatic illumination, Wi-Fi or web behavior has been
+migrated.
 A successful build is not evidence that a hardware function has been validated.
 
 All runtime features are disabled in `include/linbridge/feature_flags.h`. They
@@ -49,6 +50,12 @@ c++ -std=c++17 -Wall -Wextra -Werror -Iinclude \
     src/lin/response.cpp \
     -o /tmp/linbridge-lin-validator-test
 /tmp/linbridge-lin-validator-test
+
+c++ -std=c++17 -Wall -Wextra -Werror -Iinclude \
+    test/host/lin_master_test.cpp src/lin/master.cpp \
+    src/lin/validator.cpp src/lin/response.cpp \
+    -o /tmp/linbridge-lin-master-test
+/tmp/linbridge-lin-master-test
 ```
 
 The test combines synthetic failure cases with minimal, hexadecimal regression

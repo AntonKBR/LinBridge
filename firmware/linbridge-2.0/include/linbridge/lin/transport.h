@@ -15,7 +15,8 @@ class Transport {
     virtual void sendHeader(std::uint8_t identifier) = 0;
     virtual void sendFrame(std::uint8_t identifier, const std::uint8_t* data,
                            std::size_t length) = 0;
-    virtual bool receive(RawFrame& frame, std::uint32_t timeoutMillis) = 0;
+    virtual void clearReceive() = 0;
+    virtual bool readByte(std::uint8_t& value) = 0;
 };
 
 }  // namespace linbridge::lin
