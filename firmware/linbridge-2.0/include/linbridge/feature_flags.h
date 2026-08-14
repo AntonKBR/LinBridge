@@ -2,8 +2,8 @@
 
 namespace linbridge::features {
 
-// Step 1 is a build-only scaffold. Features stay disabled until their dedicated
-// migration step supplies an evidence-backed configuration and tests.
+// Runtime features stay disabled until their dedicated migration step supplies
+// an evidence-backed configuration, validation and tests.
 inline constexpr bool kLin = false;
 inline constexpr bool kMfaOutput = false;
 inline constexpr bool kCcsOutput = false;
