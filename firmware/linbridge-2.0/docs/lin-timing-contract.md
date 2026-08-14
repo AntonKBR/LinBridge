@@ -26,7 +26,11 @@ carried forward because the transmitted legacy frame used the fixed value.
 4. Send the ACC request header and open a response window.
 5. Validate and decode the ACC response.
 
-This step implements the transmit primitives only. It deliberately does not
-approximate the missing receive validation or activate a partial polling loop.
-The next LIN step must add bounded receive handling, length checks, PID and
-checksum validation before composing this order in `main.cpp`.
+The receive transport now captures at most 16 bytes and records overflow without
+writing outside the buffer. Validation requires an explicit expected PID, data
+length and classic/enhanced checksum model. No button or ACC `FrameSpec` is
+selected yet because the required retained capture is not available.
+
+Polling remains disabled until evidence-backed frame specifications and the
+decoder are connected. A received frame must not produce an application event
+unless validation returns `kNone`.

@@ -14,6 +14,7 @@ class Esp32UartTransport final : public Transport {
     void sendHeader(std::uint8_t identifier) override;
     void sendFrame(std::uint8_t identifier, const std::uint8_t* data,
                    std::size_t length) override;
+    bool receive(RawFrame& frame, std::uint32_t timeoutMillis) override;
 
   private:
     void sendBreak();

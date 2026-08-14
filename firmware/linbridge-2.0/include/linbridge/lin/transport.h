@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "linbridge/lin/frame.h"
+
 namespace linbridge::lin {
 
 class Transport {
@@ -13,6 +15,7 @@ class Transport {
     virtual void sendHeader(std::uint8_t identifier) = 0;
     virtual void sendFrame(std::uint8_t identifier, const std::uint8_t* data,
                            std::size_t length) = 0;
+    virtual bool receive(RawFrame& frame, std::uint32_t timeoutMillis) = 0;
 };
 
 }  // namespace linbridge::lin

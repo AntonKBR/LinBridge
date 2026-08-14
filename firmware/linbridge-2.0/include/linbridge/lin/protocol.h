@@ -47,6 +47,11 @@ constexpr std::uint8_t enhancedChecksum(const std::uint8_t pid,
     return static_cast<std::uint8_t>(~sum);
 }
 
+constexpr std::uint8_t classicChecksum(const std::uint8_t* data,
+                                       const std::size_t length) {
+    return enhancedChecksum(0, data, length);
+}
+
 static_assert(protectedIdentifier(kIlluminationIdentifier) == 0x0D);
 static_assert(protectedIdentifier(kButtonIdentifier) == 0x8E);
 static_assert(protectedIdentifier(kAccIdentifier) == 0xCF);
